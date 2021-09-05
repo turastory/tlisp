@@ -28,6 +28,38 @@ void add_history(char *unused) {}
 
 #include "mpc.h"
 
+long eval_op(char *op, long x, long y)
+{
+  if (strcmp(op, "+") == 0 || strcmp(op, "add") == 0)
+    return x + y;
+  if (strcmp(op, "-") == 0 || strcmp(op, "sub") == 0)
+    return x - y;
+  if (strcmp(op, "*") == 0 || strcmp(op, "mul") == 0)
+    return x * y;
+  if (strcmp(op, "/") == 0 || strcmp(op, "div") == 0)
+    return x / y;
+  if (strcmp(op, "%") == 0 || strcmp(op, "rem") == 0)
+    return x % y;
+  return 0;
+}
+
+long eval(mpc_ast_t *t)
+{
+  // Base case
+  if (strstr(t->tag, "number"))
+  {
+    return atoi(t->contents);
+  }
+
+  // The operator is always on third position.
+  char *op = t->children[2]->contents;
+
+  long x = eval(t->children[1]);
+  long y = eval(t->children[3]);
+
+  return eval_op(op, x, y);
+}
+
 int main(int argc, char **argv)
 {
   mpc_parser_t *Number = mpc_new("number");
@@ -57,7 +89,8 @@ int main(int argc, char **argv)
     mpc_result_t r;
     if (mpc_parse("<stdin>", input, Lispy, &r))
     {
-      mpc_ast_print(r.output);
+      long result = eval(r.output);
+      printf("%li\n", result);
       mpc_ast_delete(r.output);
     }
     else
