@@ -27,6 +27,7 @@ void add_history(char *unused) {}
 #endif
 
 #include "mpc.h"
+#include "math.h"
 
 long eval_op(char *op, long x, long y)
 {
@@ -40,6 +41,8 @@ long eval_op(char *op, long x, long y)
     return x / y;
   if (strcmp(op, "%") == 0 || strcmp(op, "rem") == 0)
     return x % y;
+  if (strcmp(op, "^") == 0)
+    return pow(x, y);
   return 0;
 }
 
@@ -70,7 +73,7 @@ int main(int argc, char **argv)
   mpca_lang(MPCA_LANG_DEFAULT,
             " \
     number   : /-?[0-9]+(\\.[0-9]+)?/ ;                   \
-    operator : '+' | '-' | '*' | '/' | '%' |            \
+    operator : '+' | '-' | '*' | '/' | '%' | '^' |            \
     \"add\" | \"sub\" | \"mul\" | \"div\" | \"rem\";    \
     expr     : <number> | '(' <expr> <operator> <expr> ')' ;  \
     lispy    : /^/ <expr> <operator> <expr> /$/ ;             \
