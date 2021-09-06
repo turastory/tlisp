@@ -55,12 +55,17 @@ long eval(mpc_ast_t *t)
   }
 
   // The operator is always on third position.
-  char *op = t->children[2]->contents;
+  char *op = t->children[1]->contents;
 
-  long x = eval(t->children[1]);
-  long y = eval(t->children[3]);
+  long x = eval(t->children[2]);
+  int i = 3;
+  while (strstr(t->children[i]->tag, "expr"))
+  {
+    x = eval_op(op, x, eval(t->children[i]));
+    i++;
+  }
 
-  return eval_op(op, x, y);
+  return x;
 }
 
 int main(int argc, char **argv)
@@ -72,11 +77,11 @@ int main(int argc, char **argv)
 
   mpca_lang(MPCA_LANG_DEFAULT,
             " \
-    number   : /-?[0-9]+(\\.[0-9]+)?/ ;                   \
-    operator : '+' | '-' | '*' | '/' | '%' | '^' |            \
+    number   : /-?[0-9]+(\\.[0-9]+)?/ ;                 \
+    operator : '+' | '-' | '*' | '/' | '%' | '^' |      \
     \"add\" | \"sub\" | \"mul\" | \"div\" | \"rem\";    \
-    expr     : <number> | '(' <expr> <operator> <expr> ')' ;  \
-    lispy    : /^/ <expr> <operator> <expr> /$/ ;             \
+    expr     : <number> | '(' <operator> <expr>+ ')' ;  \
+    lispy    : /^/ <operator> <expr>+ /$/ ;             \
   ",
             Number, Operator, Expr, Lispy);
 
